@@ -30,7 +30,6 @@ void SocketFunc::err_display(char* msg)
     LocalFree(lpMsgBuf);
 }
 
-// 사용자 정의 데이터 수신 함수
 int SocketFunc::recvn(SOCKET s, char* buf, int len, int flags)
 {
     int received;

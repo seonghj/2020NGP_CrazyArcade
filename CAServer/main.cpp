@@ -25,6 +25,7 @@ struct SOCKETINFO
     bool	connected;
     OVER_EX over;
     SOCKET sock;
+    SOCKADDR_IN clientaddr;
     char packet_buf[BUFSIZE];
     int prev_size;
 };
@@ -98,6 +99,12 @@ void InitGame()
         clients[i].connected = false;
 }
 
+void Disconnected(int id)
+{
+    printf("client_end: %d", id);
+    closesocket(clients[id].sock);
+}
+
 void do_recv(char id)
 {
     DWORD flags = 0;
@@ -126,7 +133,6 @@ void do_recv(char id)
         }
     }
     memcpy(clients[id].packet_buf, reinterpret_cast<char*>(Packet), sizeof(InputPacket));
-    //clients[id].prev_size = retval;
 }
 
 void do_send(int to, char* packet)
@@ -136,11 +142,9 @@ void do_send(int to, char* packet)
     int retval = 0;
 
     OVER_EX* over = reinterpret_cast<OVER_EX*>(malloc(sizeof(OVER_EX)));
-
+    ZeroMemory(&(over->overlapped), sizeof(WSAOVERLAPPED));
     over->dataBuffer.len = sizeof(InputPacket);
     over->dataBuffer.buf = packet;
-
-    ZeroMemory(&(over->overlapped), sizeof(WSAOVERLAPPED));
     over->is_recv = false;
 
     InputPacket* Packet = reinterpret_cast<InputPacket*>(over->dataBuffer.buf);
@@ -182,7 +186,7 @@ void process_packet(char id, char* buf)
         // 게임 시작 판단
         if (GameState != InGame)
         {
-            if (Ready[0] && Ready[1] && Ready[2] && Ready[3])
+            if (Ready[0] || Ready[1] || Ready[2] || Ready[3])
             {
                 srand((unsigned)time(NULL));
                 for (int i = 0; i < m_Map.Tile_CountY; i++)
@@ -265,7 +269,7 @@ void WorkerFunc()
 
         std::thread::id Thread_id = std::this_thread::get_id();
 
-        printf("thread id: %d\n", Thread_id);
+        //printf("thread id: %d\n", Thread_id);
 
         // 클라이언트 정보 얻기
         SOCKADDR_IN clientaddr;
@@ -290,24 +294,6 @@ void WorkerFunc()
             char packet_size = 0;
             if (0 < clients[id].prev_size)
                 packet_size = sizeof(clients[id].packet_buf);
-            /*while (rest_size > 0) {
-                if (0 == packet_size) packet_size = sizeof(buf_ptr);
-                int required = packet_size - clients[id].prev_size;
-                printf("required: %d\n", required);
-                if (rest_size >= required) {
-                    memcpy(clients[id].packet_buf + clients[id].
-                        prev_size, buf_ptr, required);
-                    process_packet(id, clients[id].packet_buf);
-                    rest_size -= required;
-                    buf_ptr += required;
-                    packet_size = 0;
-                }
-                else {
-                    memcpy(clients[id].packet_buf + clients[id].prev_size,
-                        buf_ptr, rest_size);
-                    rest_size = 0;
-                }
-            }*/
             process_packet(id, clients[id].packet_buf);
         }
         else {

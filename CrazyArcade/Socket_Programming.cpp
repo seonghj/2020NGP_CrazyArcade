@@ -177,7 +177,7 @@ DWORD WINAPI RecvClient(LPVOID arg)
             printf("%d 타입 패킷 수신\n", Recv_Player_Packet->type);
             if (Recv_Player_Packet->type == PacketType:: player)
             {
-                printf("플레이어 패킷 수신 -> type : %d, idx : %d, x : %d, y : %d, status : %d\n\n", Recv_Player_Packet->type, Recv_Player_Packet->idx_player, Recv_Player_Packet->x, Recv_Player_Packet->y, Recv_Player_Packet->status);
+                //printf("플레이어 패킷 수신 -> type : %d, idx : %d, x : %d, y : %d, status : %d\n\n", Recv_Player_Packet->type, Recv_Player_Packet->idx_player, Recv_Player_Packet->x, Recv_Player_Packet->y, Recv_Player_Packet->status);
                 if (Recv_Player_Packet->status ==Status::IN_BUBBLE) {
                     Player_Speed[Recv_Player_Packet->idx_player] = 100;
                     SetTimer(hwnd, Timer::In_Bubble, Player_Speed[Recv_Player_Packet->idx_player], (TIMERPROC)TimeProc_InBubble);
@@ -192,13 +192,65 @@ DWORD WINAPI RecvClient(LPVOID arg)
                     CSoundMgr::GetInstance()->PlayEffectSound(L"SFX_Character_Die.ogg");
                     SetTimer(hwnd, Die, 150, (TIMERPROC)TimeProc_Die);
                 }
-                else {
+                else if (Recv_Player_Packet->status == Status::MOVE_DOWN)
+                {
+                    printf("이동 패킷 수신 -> type : %d x : %d y : %d\n\n", Recv_Player_Packet->type, Recv_Player_Packet->x, Recv_Player_Packet->y);
                     Player[Recv_Player_Packet->idx_player].left = Recv_Player_Packet->x;
                     Player[Recv_Player_Packet->idx_player].right = Recv_Player_Packet->x + Player_CX;
                     Player[Recv_Player_Packet->idx_player].top = Recv_Player_Packet->y;
                     Player[Recv_Player_Packet->idx_player].bottom = Recv_Player_Packet->y + Player_CY;
+
+                    yPos_Player[Client_Idx] = DOWN;
+                    SetTimer(hwnd, P1, Player_Speed[Client_Idx], (TIMERPROC)TimeProc_P1_Move);
+                    Player_Move[Client_Idx] = TRUE;
+                }
+                else if (Recv_Player_Packet->status == Status::MOVE_RIGHT)
+                {
+                    printf("이동 패킷 수신 -> type : %d x : %d y : %d\n\n", Recv_Player_Packet->type, Recv_Player_Packet->x, Recv_Player_Packet->y);
+                    Player[Recv_Player_Packet->idx_player].left = Recv_Player_Packet->x;
+                    Player[Recv_Player_Packet->idx_player].right = Recv_Player_Packet->x + Player_CX;
+                    Player[Recv_Player_Packet->idx_player].top = Recv_Player_Packet->y;
+                    Player[Recv_Player_Packet->idx_player].bottom = Recv_Player_Packet->y + Player_CY;
+
+                    yPos_Player[Client_Idx] = RIGHT;
+                    SetTimer(hwnd, P1, Player_Speed[Client_Idx], (TIMERPROC)TimeProc_P1_Move);
+                    Player_Move[Client_Idx] = TRUE;
+                }
+                else if (Recv_Player_Packet->status == Status::MOVE_UP)
+                {
+                    printf("이동 패킷 수신 -> type : %d x : %d y : %d\n\n", Recv_Player_Packet->type, Recv_Player_Packet->x, Recv_Player_Packet->y);
+                    Player[Recv_Player_Packet->idx_player].left = Recv_Player_Packet->x;
+                    Player[Recv_Player_Packet->idx_player].right = Recv_Player_Packet->x + Player_CX;
+                    Player[Recv_Player_Packet->idx_player].top = Recv_Player_Packet->y;
+                    Player[Recv_Player_Packet->idx_player].bottom = Recv_Player_Packet->y + Player_CY;
+
+                    yPos_Player[Client_Idx] = UP;
+                    SetTimer(hwnd, P1, Player_Speed[Client_Idx], (TIMERPROC)TimeProc_P1_Move);
+                    Player_Move[Client_Idx] = TRUE;
+                }
+                else if (Recv_Player_Packet->status == Status::MOVE_LEFT)
+                {
+                    printf("이동 패킷 수신 -> type : %d x : %d y : %d\n\n", Recv_Player_Packet->type, Recv_Player_Packet->x, Recv_Player_Packet->y);
+                    Player[Recv_Player_Packet->idx_player].left = Recv_Player_Packet->x;
+                    Player[Recv_Player_Packet->idx_player].right = Recv_Player_Packet->x + Player_CX;
+                    Player[Recv_Player_Packet->idx_player].top = Recv_Player_Packet->y;
+                    Player[Recv_Player_Packet->idx_player].bottom = Recv_Player_Packet->y + Player_CY;
+
+                    yPos_Player[Client_Idx] = LEFT;
+                    SetTimer(hwnd, P1, Player_Speed[Client_Idx], (TIMERPROC)TimeProc_P1_Move);
+                    Player_Move[Client_Idx] = TRUE;
+                }
+                else {
+       
                     if (Recv_Player_Packet->status == Status::STOP)
                     {
+                        Player[Recv_Player_Packet->idx_player].left = Recv_Player_Packet->x;
+                        Player[Recv_Player_Packet->idx_player].right = Recv_Player_Packet->x + Player_CX;
+                        Player[Recv_Player_Packet->idx_player].top = Recv_Player_Packet->y;
+                        Player[Recv_Player_Packet->idx_player].bottom = Recv_Player_Packet->y + Player_CY;
+                        printf("플레이어 정지 패킷 수신 -> type : %d, idx : %d | %d\n\n"
+                            , Recv_Player_Packet->type, Recv_Player_Packet->idx_player
+                            , yPos_Player[Recv_Player_Packet->idx_player]);
                         xPos_Player[Recv_Player_Packet->idx_player] = 0;
                         Player_Move[Recv_Player_Packet->idx_player] = FALSE;
                     }

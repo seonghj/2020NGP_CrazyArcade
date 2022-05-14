@@ -22,6 +22,14 @@ enum PacketType
 	end,
 };
 
+enum Dir
+{
+	UP,
+	DOWN,
+	RIGHT,
+	LEFT
+};
+
 struct InputPacket : public Packet
 {
 public:

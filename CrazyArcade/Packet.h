@@ -4,6 +4,8 @@
 // ÀÌµ¿ = 1, ¹°Ç³¼± = 2
 struct Packet
 {
+public:
+	Packet() {}
 	Packet(int type) { this->type = type; }
 	int type;
 };
@@ -21,12 +23,14 @@ enum PacketType
 
 struct InputPacket : public Packet
 {
+public:
+	InputPacket() { }
 	InputPacket(int idx, int x, int y, u_short stat) :Packet(player) { idx_player = idx; this->x = x; this->y = y; status = stat; }
 	InputPacket(int idx, int x, int y) :Packet(bubble) { this->x = x; this->y = y; this->idx_player = idx; }
 
 	int idx_player;
 	int x, y;
-	u_short status = 0;
+	u_short status;
 };
 
 struct PlayerPacket : public Packet
