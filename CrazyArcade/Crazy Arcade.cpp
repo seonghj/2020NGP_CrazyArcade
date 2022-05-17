@@ -1162,10 +1162,10 @@ void CALLBACK TimeProc_Bubble_Flow(HWND hWnd, UINT uMsg, UINT idEvent, DWORD dwT
 
 void CALLBACK TimeProc_P1_Move(HWND hWnd, UINT uMsg, UINT idEvent, DWORD dwTime)
 {
-	printf("tlqkf | %d\n", (yPos_Player[Client_Idx]));
-	RECT tmpRECT = Player[Client_Idx];
+	int idx = (int)idEvent;
+	RECT tmpRECT = Player[idx];
 	RECT rc;
-	switch (yPos_Player[Client_Idx]) {
+	switch (yPos_Player[idx]) {
 	case LEFT:
 		if (tmpRECT.left >= StartX + 10) {
 			tmpRECT.left -= 5;
@@ -1204,7 +1204,7 @@ void CALLBACK TimeProc_P1_Move(HWND hWnd, UINT uMsg, UINT idEvent, DWORD dwTime)
 		}
 		break;
 	case RIGHT:
-		if (tmpRECT.right <= Tile[12][14].right - 10) {
+		if (tmpRECT.right <= Tile[12][14].right - 20) {
 			tmpRECT.left += 5;
 			tmpRECT.right += 5;
 			for (int i = 0; i < Tile_CountY; i++)
@@ -1223,7 +1223,7 @@ void CALLBACK TimeProc_P1_Move(HWND hWnd, UINT uMsg, UINT idEvent, DWORD dwTime)
 						}
 					}
 		}
-		else if (tmpRECT.right >= Tile[12][14].right - 10) {
+		else if (tmpRECT.right >= Tile[12][14].right - 20) {
 			tmpRECT.right = Tile[12][14].right;
 			tmpRECT.left = tmpRECT.right - Player_CX;
 		}
@@ -1315,13 +1315,14 @@ void CALLBACK TimeProc_P1_Move(HWND hWnd, UINT uMsg, UINT idEvent, DWORD dwTime)
 		}
 		break;
 	}
+	Player[idx] = tmpRECT;
 
 	for (int i = 0; i < nPlayer; i++)
 	{
-		if (bInBubble[i] && i != Client_Idx)
+		if (bInBubble[i] && i != idx)
 		{
 			printf("인버블\n");
-			if (IntersectRect(&rc, &tmpRECT, &Player[i]) && !bDie[Client_Idx] && !bInBubble[Client_Idx]) {
+			if (IntersectRect(&rc, &tmpRECT, &Player[i]) && !bDie[idx] && !bInBubble[idx]) {
 				printf("해치웠냐?");
 				WaitForSingleObject(hSendEvent, INFINITE);
 				if (!Send_Client_Packet) {

@@ -47,7 +47,7 @@ extern BOOL Box_Break[13][15];
 extern enum Player_Position { LEFT = 3, RIGHT = 2, UP = 0, DOWN = 1 };
 extern enum GAME_BG { MENU = 1, ROBBY, INGAME };
 extern enum Item { Ball = 1, OnePower = 6, Speed = 11, MaxPower = 16, RedDevil = 21 };
-extern enum Timer { P1 = 0, P2 = 1, P3 = 2, P4 = 3, Bubble_BfBoom, Bubble_Flow, In_Bubble, Die, Monster_Move, Recv_Bubble };
+extern enum Timer { P1 = 1, P2 = 2, P3 = 3, P4 = 4, Bubble_BfBoom, Bubble_Flow, In_Bubble, Die, Monster_Move, Recv_Bubble };
 
 extern int Sel_Map;
 
@@ -177,6 +177,7 @@ DWORD WINAPI RecvClient(LPVOID arg)
             printf("%d 타입 패킷 수신\n", Recv_Player_Packet->type);
             if (Recv_Player_Packet->type == PacketType:: player)
             {
+                int idx = Recv_Player_Packet->idx_player;
                 //printf("플레이어 패킷 수신 -> type : %d, idx : %d, x : %d, y : %d, status : %d\n\n", Recv_Player_Packet->type, Recv_Player_Packet->idx_player, Recv_Player_Packet->x, Recv_Player_Packet->y, Recv_Player_Packet->status);
                 if (Recv_Player_Packet->status ==Status::IN_BUBBLE) {
                     Player_Speed[Recv_Player_Packet->idx_player] = 100;
@@ -200,9 +201,9 @@ DWORD WINAPI RecvClient(LPVOID arg)
                     Player[Recv_Player_Packet->idx_player].top = Recv_Player_Packet->y;
                     Player[Recv_Player_Packet->idx_player].bottom = Recv_Player_Packet->y + Player_CY;
 
-                    yPos_Player[Client_Idx] = DOWN;
-                    SetTimer(hwnd, P1, Player_Speed[Client_Idx], (TIMERPROC)TimeProc_P1_Move);
-                    Player_Move[Client_Idx] = TRUE;
+                    yPos_Player[idx] = DOWN;
+                    SetTimer(hwnd, idx, Player_Speed[idx], (TIMERPROC)TimeProc_P1_Move);
+                    Player_Move[idx] = TRUE;
                 }
                 else if (Recv_Player_Packet->status == Status::MOVE_RIGHT)
                 {
@@ -212,9 +213,9 @@ DWORD WINAPI RecvClient(LPVOID arg)
                     Player[Recv_Player_Packet->idx_player].top = Recv_Player_Packet->y;
                     Player[Recv_Player_Packet->idx_player].bottom = Recv_Player_Packet->y + Player_CY;
 
-                    yPos_Player[Client_Idx] = RIGHT;
-                    SetTimer(hwnd, P1, Player_Speed[Client_Idx], (TIMERPROC)TimeProc_P1_Move);
-                    Player_Move[Client_Idx] = TRUE;
+                    yPos_Player[idx] = RIGHT;
+                    SetTimer(hwnd, idx, Player_Speed[idx], (TIMERPROC)TimeProc_P1_Move);
+                    Player_Move[idx] = TRUE;
                 }
                 else if (Recv_Player_Packet->status == Status::MOVE_UP)
                 {
@@ -224,9 +225,9 @@ DWORD WINAPI RecvClient(LPVOID arg)
                     Player[Recv_Player_Packet->idx_player].top = Recv_Player_Packet->y;
                     Player[Recv_Player_Packet->idx_player].bottom = Recv_Player_Packet->y + Player_CY;
 
-                    yPos_Player[Client_Idx] = UP;
-                    SetTimer(hwnd, P1, Player_Speed[Client_Idx], (TIMERPROC)TimeProc_P1_Move);
-                    Player_Move[Client_Idx] = TRUE;
+                    yPos_Player[idx] = UP;
+                    SetTimer(hwnd, idx, Player_Speed[idx], (TIMERPROC)TimeProc_P1_Move);
+                    Player_Move[idx] = TRUE;
                 }
                 else if (Recv_Player_Packet->status == Status::MOVE_LEFT)
                 {
@@ -236,21 +237,21 @@ DWORD WINAPI RecvClient(LPVOID arg)
                     Player[Recv_Player_Packet->idx_player].top = Recv_Player_Packet->y;
                     Player[Recv_Player_Packet->idx_player].bottom = Recv_Player_Packet->y + Player_CY;
 
-                    yPos_Player[Client_Idx] = LEFT;
-                    SetTimer(hwnd, P1, Player_Speed[Client_Idx], (TIMERPROC)TimeProc_P1_Move);
-                    Player_Move[Client_Idx] = TRUE;
+                    yPos_Player[idx] = LEFT;
+                    SetTimer(hwnd, idx, Player_Speed[idx], (TIMERPROC)TimeProc_P1_Move);
+                    Player_Move[idx] = TRUE;
                 }
                 else {
        
                     if (Recv_Player_Packet->status == Status::STOP)
                     {
+                        KillTimer(hwnd, idx);
                         Player[Recv_Player_Packet->idx_player].left = Recv_Player_Packet->x;
                         Player[Recv_Player_Packet->idx_player].right = Recv_Player_Packet->x + Player_CX;
                         Player[Recv_Player_Packet->idx_player].top = Recv_Player_Packet->y;
                         Player[Recv_Player_Packet->idx_player].bottom = Recv_Player_Packet->y + Player_CY;
-                        printf("플레이어 정지 패킷 수신 -> type : %d, idx : %d | %d\n\n"
-                            , Recv_Player_Packet->type, Recv_Player_Packet->idx_player
-                            , yPos_Player[Recv_Player_Packet->idx_player]);
+                        printf("플레이어 정지 패킷 수신 -> type : %d, idx : %d\n\n"
+                            , Recv_Player_Packet->type, Recv_Player_Packet->idx_player);
                         xPos_Player[Recv_Player_Packet->idx_player] = 0;
                         Player_Move[Recv_Player_Packet->idx_player] = FALSE;
                     }
@@ -373,6 +374,9 @@ DWORD WINAPI RecvClient(LPVOID arg)
                 KillTimer(hwnd, Die);
                 KillTimer(hwnd, Bubble_Flow);
                 KillTimer(hwnd, P1);
+                KillTimer(hwnd, P2);
+                KillTimer(hwnd, P3);
+                KillTimer(hwnd, P4);
                 SetPos();
             }
         }
