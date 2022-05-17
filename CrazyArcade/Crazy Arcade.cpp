@@ -1544,6 +1544,7 @@ void KEY_DOWN_P1(HWND hWnd)
 						Send_Client_Packet->type = PacketType::player;
 					}
 					SetEvent(hInputEvent);
+					printf("방향키 누름\n");
 				}
 				if (GetAsyncKeyState(VK_UP) & 0x8000) {
 					/*yPos_Player[Client_Idx] = UP;
@@ -1555,6 +1556,7 @@ void KEY_DOWN_P1(HWND hWnd)
 						Send_Client_Packet->type = PacketType::player;
 					}
 					SetEvent(hInputEvent);
+					printf("방향키 누름\n");
 				}
 				if (GetAsyncKeyState(VK_LEFT) & 0x8000) {
 					/*yPos_Player[Client_Idx] = LEFT;
@@ -1567,7 +1569,7 @@ void KEY_DOWN_P1(HWND hWnd)
 						Send_Client_Packet->type = PacketType::player;
 					}
 					SetEvent(hInputEvent);
-
+					printf("방향키 누름\n");
 				}
 				if (GetAsyncKeyState(VK_RIGHT) & 0x8000) {
 					/*yPos_Player[Client_Idx] = RIGHT;
@@ -1579,6 +1581,7 @@ void KEY_DOWN_P1(HWND hWnd)
 						Send_Client_Packet->type = PacketType::player;
 					}
 					SetEvent(hInputEvent);
+					printf("방향키 누름\n");
 				}
 			}
 			if (GetAsyncKeyState(VK_SPACE) & 0x8000 && !bInBubble[Client_Idx]) {
@@ -1623,7 +1626,7 @@ void KEY_UP_P1(WPARAM wParam, HWND hWnd)
 		(wParam == VK_UP && yPos_Player[Client_Idx] == UP) ||
 		(wParam == VK_LEFT && yPos_Player[Client_Idx] == LEFT) ||
 		(wParam == VK_RIGHT && yPos_Player[Client_Idx] == RIGHT)) {
-		KillTimer(hwnd, P1);
+		//KillTimer(hwnd, Client_Idx);
 		xPos_Player[Client_Idx] = 0;
 		Player_Move[Client_Idx] = FALSE;
 		WaitForSingleObject(hSendEvent, INFINITE);

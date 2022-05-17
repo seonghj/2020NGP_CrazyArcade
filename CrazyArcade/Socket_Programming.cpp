@@ -119,12 +119,10 @@ DWORD WINAPI RecvClient(LPVOID arg)
 
 
     // 커넥트 이후 자신의 플레이어 패킷 수신
-    printf("여기\n");
     retval = recvn(sock, buf, sizeof(InputPacket), 0);
     buf[retval] = '\0';
     Recv_Player_Packet = (InputPacket*)buf;
     SetEvent(hConnectEvent);    //connect가 끝나면 송신에서도 변수 사용가능하다는 이벤트 발생시킨다.
-    printf("야 위치 받았다. %d %d\n\n", Recv_Player_Packet->x, Recv_Player_Packet->y);
     printf("Packet ID : %d\nPacket x : %d\nPacket y : %d\nPacket type : %d\n", Recv_Player_Packet->idx_player, Recv_Player_Packet->x, Recv_Player_Packet->y, Recv_Player_Packet->type);
     Client_Idx = Recv_Player_Packet->idx_player;
     nPlayer = Client_Idx + 1;
@@ -145,8 +143,8 @@ DWORD WINAPI RecvClient(LPVOID arg)
             {
                 printf("시작\n");
                 // 게임 스타트 (GameState 3으로 바꾸고 사운드랑 불값 체인지 필요
-                CSoundMgr::GetInstance()->PlayEffectSound(L"SFX_Button_Off.ogg");
-                CSoundMgr::GetInstance()->PlayEffectSound2(L"SFX_Word_Start.ogg");
+               /* CSoundMgr::GetInstance()->PlayEffectSound(L"SFX_Button_Off.ogg");
+                CSoundMgr::GetInstance()->PlayEffectSound2(L"SFX_Word_Start.ogg");*/
                 TextOn = TRUE;
                 SetTimer(hwnd, 8, 750, (TIMERPROC)TimeProc_Text);
                 GameState = INGAME;
@@ -329,10 +327,10 @@ DWORD WINAPI RecvClient(LPVOID arg)
             }
             else if (Recv_Player_Packet->type == PacketType::end)
             {
-                if(bDie[Client_Idx])
+               /* if(bDie[Client_Idx])
                     CSoundMgr::GetInstance()->PlayEffectSound2(L"SFX_Word_Lose.ogg");
                 else
-                    CSoundMgr::GetInstance()->PlayEffectSound2(L"SFX_Word_Win.ogg");
+                    CSoundMgr::GetInstance()->PlayEffectSound2(L"SFX_Word_Win.ogg");*/
                 Ending = true;
                 GameState = ROBBY;
                 TextOn = FALSE;

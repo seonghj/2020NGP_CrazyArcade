@@ -186,7 +186,7 @@ void process_packet(char id, char* buf)
         // 게임 시작 판단
         if (GameState != InGame)
         {
-            if (Ready[0] || Ready[1] || Ready[2] || Ready[3])
+            if (Ready[0] && Ready[1] && Ready[2] && Ready[3])
             {
                 srand((unsigned)time(NULL));
                 for (int i = 0; i < m_Map.Tile_CountY; i++)
