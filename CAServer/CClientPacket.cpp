@@ -1,7 +1,6 @@
 #pragma once
 #include "CClientPacket.h"
 
-
 void PacketFunc::InitPlayer(CMap m_Map, InputPacket *Send_P, int idx)
 {
     Send_P->type = PacketType::player;
@@ -18,6 +17,10 @@ void PacketFunc::InitPlayer(CMap m_Map, InputPacket *Send_P, int idx)
     else if (idx == 3)
         Send_P->x = m_Map.Tile[12][13].left, Send_P->y = m_Map.Tile[12][13].top
         , Send_P->status = 0;
+
+    User[idx].x = Send_P->x;
+    User[idx].y = Send_P->y;
+    User[idx].speed = 40;
 }
 
 void PacketFunc::InitPacket(InputPacket* P)

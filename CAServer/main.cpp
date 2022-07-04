@@ -222,17 +222,24 @@ void process_packet(char id, char* buf)
 
     if (GameState == InGame)
     {
-        for (int i = 0; i < MAX_CLIENT; ++i)
-            if (clients[i].connected)
-                do_send(i, buf);
-        if (Packet->type == end)
-        {
+        switch (Packet->type) {
+        case PacketType::end: {
             Game_Over[id] = TRUE;
             if (Game_Over[0] && Game_Over[1] && Game_Over[2] && Game_Over[3])
             {
                 GameState = GameOver;
             }
+            break;
         }
+        case PacketType::player: {
+            m_PF.User[id].x = Packet->x;
+            m_PF.User[id].y = Packet->y;
+            break;
+        }
+        }
+        for (int i = 0; i < MAX_CLIENT; ++i)
+            if (clients[i].connected)
+                do_send(i, buf);
     }
     if (GameState == GameOver)
     {
@@ -269,7 +276,6 @@ void WorkerFunc()
 
         std::thread::id Thread_id = std::this_thread::get_id();
 
-        //printf("thread id: %d\n", Thread_id);
 
         // 클라이언트 정보 얻기
         SOCKADDR_IN clientaddr;
@@ -277,7 +283,6 @@ void WorkerFunc()
         getpeername(clients[id].sock, (SOCKADDR*)&clientaddr, &addrlen);
 
         // 비동기 입출력 결과 확인
-
         if (FALSE == retval)
             err_display("WSAGetOverlappedResult()");
         if (0 == cbTransferred) {
@@ -339,7 +344,6 @@ int do_accept()
 
     int count = 0;
 
-    //InitializeCriticalSection(&cs);
 
     for (int i = 0; i < MAX_CLIENT; i++)
         m_PF.InitPacket(&Player_P[i]);
@@ -359,20 +363,6 @@ int do_accept()
         printf("[TCP 서버] 클라이언트 접속: IP 주소=%s, 포트 번호=%d, key=%d\n",
             inet_ntoa(clientaddr.sin_addr), ntohs(clientaddr.sin_port), new_id);
 
-        //// DB 데이터 입력
-        //sprintf(query, "INSERT into player (idplayer) VALUES"
-        //    "('%d')", new_id);
-        //int state = mysql_query(connection, query);
-        //if (state != 0)
-        //{
-        //    printf("MySQL query error : %s\n", mysql_error(&conn));
-        //    //return 1;
-        //}
-
-        //m_Map.Init_Map();
-        //m_PF.InitPacket(&Recv_P);
-        //m_PF.InitPacket(&Send_P);
-        ////ClientOn[Thread_Count] = TRUE;
 
         memset(&clients[new_id], 0x00, sizeof(struct SOCKETINFO));
         clients[new_id].sock = client_sock;
@@ -393,11 +383,9 @@ int do_accept()
 
         if (GameState == Robby)
         {
-            // 접속 후 초기 데이터 전송
             if (!InRobby[new_id])
             {
                 Accept_count++;
-                //EnterCriticalSection(&cs);
                 m_PF.InitPlayer(m_Map, &Player_P[new_id], new_id);
 
                 do_send(new_id, (char*)&Player_P[new_id]);
@@ -419,12 +407,10 @@ int do_accept()
                 }
                 InRobby[new_id] = TRUE;
 
-                //LeaveCriticalSection(&cs);
             }
             do_recv(new_id);
         }
     }
-    //DeleteCriticalSection(&cs);
 
     // closesocket()
     closesocket(listen_sock);
@@ -437,54 +423,26 @@ int do_accept()
 
 int main(int argc, char* argv[])
 {
-    //printf("MySQL Ver. %s\n", mysql_get_client_info());
-
-    //if (mysql_init(&conn) == NULL)
-    //    printf("mysql_init() error\n");
-
-    //connection = mysql_real_connect(&conn, DB_HOST, DB_USER
-    //    , DB_PW, DB_NAME, 3306, (const char*)NULL, 0);
-
-    //mysql_query(connection, "set session character_set_connection=euckr;");
-    //mysql_query(connection, "set session character_set_results=euckr;");
-    //mysql_query(connection, "set session character_set_client=euckr;");
-
-    //if (connection == NULL)
-    //{
-    //    printf("%d: %s\n", mysql_errno(&conn), mysql_error(&conn));
-    //    //return 1;
-    //}
-    //else
-    //{
-    //    printf("DB connected\n");
-    //}
-
     std::vector <std::thread> working_threads;
 
     for (int i = 0; i < MAX_CLIENT; ++i)
         clients[i].connected = false;
 
-    // 입출력 완료 포트 생성
     hcp = CreateIoCompletionPort(INVALID_HANDLE_VALUE, 0, 0, 0);
     if (hcp == NULL) return 1;
 
-    // CPU 개수 확인
     SYSTEM_INFO si;
     GetSystemInfo(&si);
-
-    // (CPU 개수 * 2)개의 작업자 스레드 생성
     for (int i = 0; i < (int)si.dwNumberOfProcessors * 2; i++) {
         working_threads.emplace_back(std::thread{ &WorkerFunc });
     }
     accept_thread = std::thread(&do_accept);
 
-    // 스레드 종료 대기
     accept_thread.join();
     for (auto& t : working_threads)
         t.join();
 
     CloseHandle(hcp);
-    //mysql_close(connection);
 
     return 0;
 }

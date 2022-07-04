@@ -2,6 +2,13 @@
 #include"stdafx.h"
 #include "CMap.h"
 
+struct Player
+{
+	int x;
+	int y;
+	int speed = 40;
+};
+
 // ¿Ãµø = 1, π∞«≥º± = 2
 struct Packet
 {
@@ -90,6 +97,8 @@ public:
 	void InitPlayer(CMap m_Map, InputPacket* Send_P, int idx);
 	void InitPacket(InputPacket* P);
 	void InitItem(ItemPacket* P, CMap m_Map);
+
+	Player User[4];
 };
 
 enum Item { 
