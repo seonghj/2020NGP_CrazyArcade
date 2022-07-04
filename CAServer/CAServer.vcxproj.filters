@@ -21,9 +21,6 @@
     <ClCompile Include="CClientPacket.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="ServerFunc.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
     <ClCompile Include="CMap.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
@@ -33,9 +30,6 @@
       <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="CClientPacket.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="ServerFunc.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="CMap.h">

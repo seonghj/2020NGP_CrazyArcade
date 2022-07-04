@@ -1,6 +1,5 @@
 #define _WINSOCK_DEPRECATED_NO_WARNINGS // 최신 VC++ 컴파일 시 경고 방지
 #include "stdafx.h"
-#include "ServerFunc.h"
 #include "CClientPacket.h"
 
 int client_ID[4] = { 1, 2, 3, 4 };
@@ -122,8 +121,8 @@ void do_recv(char id)
 
     retval = WSARecv(client_s, &over->dataBuffer, 1, (LPDWORD)clients[id].prev_size,
         &flags, &(over->overlapped), NULL);
-    printf("Recv %d번 <- type: %d, x: %d, y: %d\n", id,
-        Packet->type, Packet->x, Packet->y);
+    /*printf("Recv %d번 <- type: %d, x: %d, y: %d\n", id,
+        Packet->type, Packet->x, Packet->y);*/
     if (retval == SOCKET_ERROR)
     {
         int err_no = WSAGetLastError();
@@ -148,7 +147,7 @@ void do_send(int to, char* packet)
     over->is_recv = false;
 
     InputPacket* Packet = reinterpret_cast<InputPacket*>(over->dataBuffer.buf);
-    printf("Send -> type: %d, x: %d, y: %d\n", Packet->type, Packet->x, Packet->y);
+    //printf("Send -> type: %d, x: %d, y: %d\n", Packet->type, Packet->x, Packet->y);
     retval = WSASend(client_s, &over->dataBuffer, 1, NULL,
         0, &(over->overlapped), NULL);
 
@@ -188,6 +187,7 @@ void process_packet(char id, char* buf)
         {
             if (Ready[0] && Ready[1] && Ready[2] && Ready[3])
             {
+                m_Map.Init_Map();
                 srand((unsigned)time(NULL));
                 for (int i = 0; i < m_Map.Tile_CountY; i++)
                 {
@@ -199,8 +199,9 @@ void process_packet(char id, char* buf)
                             Item_P.idx_player = ItemValue;
                             Item_P.type = PacketType::item;
                             for (int a = 0; a < MAX_CLIENT; ++a)
-                                if (clients[a].connected == true)
+                                if (clients[a].connected == true) {
                                     do_send(a, (char*)&Item_P);
+                                }
                         }
                     }
                 }
