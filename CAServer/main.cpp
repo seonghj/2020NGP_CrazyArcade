@@ -295,11 +295,6 @@ void WorkerFunc()
 
         if (lpover_ex->is_recv) {
             do_recv(id);
-            int rest_size = cbTransferred;
-            char* buf_ptr = lpover_ex->messageBuffer;
-            char packet_size = 0;
-            if (0 < clients[id].prev_size)
-                packet_size = sizeof(clients[id].packet_buf);
             process_packet(id, clients[id].packet_buf);
         }
         else {
