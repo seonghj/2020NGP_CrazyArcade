@@ -377,8 +377,6 @@ int do_accept()
                         for (int j = 0; j < new_id + 1; ++j)
                         {
                             do_send(i, (char*)&Player_P[j]);
-                            printf("[TCP 서버] %d로 %d의 초기 데이터 전송: %d, %d\n"
-                                , i, j, Player_P[j].x, Player_P[j].y);
                         }
                     }
 
