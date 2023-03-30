@@ -33,7 +33,7 @@ SOCKETINFO clients[MAX_CLIENT];
 
 HANDLE hcp;
 
-int Thread_Count = -1; // send+recv스레드 쌍 갯수
+int Player_Count = -1;
 
 //HANDLE hReadEvent, hWriteEvent;
 
@@ -53,7 +53,6 @@ int Death_count = 0; // 죽은 유저 수
 int Accept_count = 0; // 클라이언트가 서버에 접속한 횟수
 int ItemValue;
 
-// 소켓 함수 오류 출력 후 종료
 void err_quit(char* msg)
 {
     LPVOID lpMsgBuf;
@@ -67,7 +66,6 @@ void err_quit(char* msg)
     exit(1);
 }
 
-// 소켓 함수 오류 출력
 void err_display(char* msg)
 {
     LPVOID lpMsgBuf;
@@ -168,7 +166,6 @@ void process_packet(char id, char* buf)
     if (GameState == Robby || GameState == InGame || GameState == Gameready)
     {
         if (Packet->type == ready) {
-            printf("Recv %d번: S<-C: %d = 시작 신호\n", id, Packet->type);
             Ready[id] = TRUE;
             GameState = Gameready;
         }
@@ -177,7 +174,7 @@ void process_packet(char id, char* buf)
             if (Packet->status == Status::DEAD)
             {
                 Death_count++;
-                if (Thread_Count - Death_count <= 0)
+                if (Player_Count - Death_count <= 0)
                     Packet->type = end;
             }
         }
@@ -205,7 +202,6 @@ void process_packet(char id, char* buf)
                         }
                     }
                 }
-                printf("Send 아이템 위치 보냄\n");
                 ItemReady = TRUE;
                 if (ItemReady)
                 {
@@ -214,7 +210,6 @@ void process_packet(char id, char* buf)
                     for (int i = 0; i < MAX_CLIENT; ++i)
                         if (clients[i].connected)
                             do_send(i, (char*)&Send_P);
-                    printf("Send %d번 게임 시작 신호 보냄\n", id);
                     GameState = InGame;
                 }
             }
@@ -278,19 +273,15 @@ void WorkerFunc()
         std::thread::id Thread_id = std::this_thread::get_id();
 
 
-        // 클라이언트 정보 얻기
         SOCKADDR_IN clientaddr;
         int addrlen = sizeof(clientaddr);
         getpeername(clients[id].sock, (SOCKADDR*)&clientaddr, &addrlen);
 
-        // 비동기 입출력 결과 확인
         if (FALSE == retval)
             err_display("WSAGetOverlappedResult()");
         if (0 == cbTransferred) {
             closesocket(clients[id].sock);
             clients[id].connected = false;
-            printf("[TCP 서버] 클라이언트 종료: IP 주소=%s, 포트 번호=%d\n",
-                inet_ntoa(clientaddr.sin_addr), ntohs(clientaddr.sin_port));
         }
 
         if (lpover_ex->is_recv) {
@@ -328,7 +319,6 @@ int do_accept()
     retval = listen(listen_sock, MAX_CLIENT);
     if (retval == SOCKET_ERROR) err_quit("listen()");
 
-    // 데이터 통신에 사용할 변수
     SOCKET client_sock;
     SOCKADDR_IN clientaddr;
     int addrlen = sizeof(SOCKADDR_IN);
@@ -352,13 +342,9 @@ int do_accept()
         }
         getpeername(client_sock, (SOCKADDR*)&clientaddr, &addrlen);
 
-        Thread_Count++;
+        Player_Count++;
 
         int new_id = get_new_id();
-
-        printf("[TCP 서버] 클라이언트 접속: IP 주소=%s, 포트 번호=%d, key=%d\n",
-            inet_ntoa(clientaddr.sin_addr), ntohs(clientaddr.sin_port), new_id);
-
 
         memset(&clients[new_id], 0x00, sizeof(struct SOCKETINFO));
         clients[new_id].sock = client_sock;
@@ -368,7 +354,6 @@ int do_accept()
         clients[new_id].over.is_recv = true;
         flags = 0;
 
-        // 소켓과 입출력 완료 포트 연결
         CreateIoCompletionPort((HANDLE)client_sock, hcp, new_id, 0);
         clients[new_id].connected = true;
 
